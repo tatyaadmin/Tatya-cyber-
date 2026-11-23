@@ -1,0 +1,892 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ClearShield</title>
+<style>
+:root{--bg:#f4f7fb;--ink:#17243b;--muted:#687790;--line:#e2e9f2;--blue:#2764e8;--green:#16794c;--greenbg:#e6f6ee;--amber:#996a13;--amberbg:#fff4dd;--red:#b4292b;--redbg:#fdecec}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px system-ui,Arial}
+.shell{max-width:1150px;margin:auto;padding:20px}
+.card{background:white;border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px}
+.header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{display:flex;gap:10px;align-items:center}
+.logo{background:linear-gradient(135deg,#2563eb,#7250e8);color:white;border-radius:12px;padding:12px}
+.muted{color:var(--muted);font-size:13px;line-height:1.55}
+.btn{border:0;border-radius:10px;padding:11px 14px;min-height:44px;background:var(--blue);color:white;font-weight:700;cursor:pointer;font-size:14px}
+.btn[disabled],.small[disabled]{opacity:.6;cursor:not-allowed}
+.alt{background:white;color:var(--ink);border:1px solid var(--line)}
+input,select,textarea{padding:12px;background:white;color:var(--ink);font-family:inherit;border:1px solid var(--line);border-radius:10px;width:100%;font-size:16px;min-height:44px}
+input:focus,select:focus,textarea:focus{outline:2px solid #bcd0fa;border-color:var(--blue)}
+.row{display:flex;gap:8px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.tile .muted{font-size:12px}
+.num{font-size:26px;font-weight:800;margin:7px 0}
+.site{padding:12px;border:1px solid var(--line);border-radius:12px;margin:9px 0;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.site b{word-break:break-all}
+.sbtns{display:flex;flex-wrap:wrap;gap:6px}
+.small{background:#f4f8ff;color:#2455a8;border:1px solid #dbe6fb;border-radius:9px;padding:8px 12px;min-height:40px;font-weight:700;cursor:pointer;font-size:13px}
+.small.primary{background:var(--blue);color:white;border-color:var(--blue)}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.check,.finding{border:1px solid var(--line);border-radius:12px;padding:12px}
+.finding{margin-top:10px}
+.fhead{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;flex-wrap:wrap}
+.check p,.finding p{font-size:13px;color:var(--muted);line-height:1.5}
+.tag{font-size:11px;font-weight:700;padding:4px 8px;border-radius:20px;display:inline-block}
+.t-ok{background:var(--greenbg);color:var(--green)}
+.t-warn{background:var(--amberbg);color:var(--amber)}
+.t-grey{background:#eef1f6;color:#52607a}
+.t-bad{background:var(--redbg);color:var(--red)}
+.state{font-size:13px;font-weight:700;border-radius:10px;padding:9px 11px;margin:8px 0;line-height:1.45}
+.state.fixed{background:var(--amberbg);color:var(--amber)}
+.state.ignored{background:var(--redbg);color:var(--red)}
+.state.good{background:var(--greenbg);color:var(--green)}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.report{white-space:pre-wrap;background:#f7f9fc;padding:12px;border-radius:10px;font-size:12px;line-height:1.6;word-break:break-word}
+.hidden{display:none}
+.auth{max-width:480px;margin:6vh auto;padding:22px;background:white;border:1px solid var(--line);border-radius:18px}
+.field{margin:12px 0}
+.field label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}
+.authbtns{display:flex;flex-wrap:wrap;gap:8px}
+.msg{font-size:13px;line-height:1.5;margin:10px 0 0;padding:0}
+.msg.ok{color:var(--green);font-weight:700}
+.msg.err{color:var(--red);font-weight:700}
+.modal{position:fixed;inset:0;background:#0006;display:none;align-items:center;justify-content:center;padding:15px;z-index:20}
+.box{width:100%;max-width:560px;max-height:90vh;overflow:auto;background:white;padding:22px;border-radius:16px}
+.dsec{margin:14px 0}
+.dsec h4{margin:0 0 4px;font-size:14px}
+.dsec p{margin:0;font-size:14px;line-height:1.55}
+.steps{margin:6px 0 0;padding-left:20px;font-size:14px;line-height:1.55}
+.steps li{margin-bottom:6px}
+pre.code{background:#101a2e;color:#e8eefc;padding:12px;border-radius:10px;font-size:12px;line-height:1.55;white-space:pre-wrap;word-break:break-word;margin:6px 0 8px}
+.warn{background:var(--amberbg);color:#6f4d0c;border-radius:12px;padding:12px;font-size:13px;line-height:1.55;margin:14px 0}
+.foot{text-align:center;color:var(--muted);font-size:11px;padding:15px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);max-width:92vw;padding:12px 16px;border-radius:12px;font-size:14px;font-weight:600;color:white;background:#17243b;z-index:30;display:none;box-shadow:0 6px 24px #0003}
+.toast.ok{background:var(--green)}
+.toast.err{background:var(--red)}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid #bcd0fa;border-top-color:var(--blue);border-radius:50%;animation:sp .8s linear infinite;vertical-align:-1px;margin-right:6px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.tabs{display:flex;gap:8px;margin:16px 0 0}
+.tab{flex:1;max-width:220px;border:1px solid var(--line);background:white;color:var(--ink);border-radius:12px;padding:11px 14px;min-height:44px;font-weight:700;font-size:14px;cursor:pointer}
+.tab.on{background:var(--blue);border-color:var(--blue);color:white}
+.tobihead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px;background:linear-gradient(115deg,#eaf1ff,#f3eeff)}
+.tobilogo{background:linear-gradient(135deg,#7250e8,#2563eb);font-size:20px;line-height:1}
+.msgs{display:flex;flex-direction:column;gap:10px;min-height:300px;max-height:58vh;overflow:auto;padding:4px 2px 8px}
+.m{display:flex;flex-direction:column;gap:3px;max-width:92%}
+.m.user{align-self:flex-end;align-items:flex-end}
+.who{font-size:11px;font-weight:700;color:var(--muted)}
+.b{padding:10px 13px;border-radius:14px;line-height:1.6;font-size:14px;white-space:pre-wrap;word-break:break-word}
+.b.user{background:var(--blue);color:white;border-bottom-right-radius:4px}
+.b.bot{background:#f1f5fb;border:1px solid var(--line);border-bottom-left-radius:4px}
+.b.err{background:var(--redbg);color:var(--red);border-bottom-left-radius:4px}
+.b code{background:#e4ebf7;border-radius:5px;padding:1px 5px;font-size:12.5px}
+.note{align-self:center;text-align:center;font-size:12px;color:var(--muted);padding:2px 8px}
+.cb{margin:8px 0 2px;white-space:normal}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.compose{display:flex;gap:8px;align-items:flex-end}
+.compose textarea{resize:vertical;min-height:48px;max-height:160px;line-height:1.45}
+.compose .btn{min-width:84px}
+.ctxbox{background:#f7f9fc;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+details summary{cursor:pointer;font-weight:700;font-size:14px;margin-bottom:8px}
+.code-inline{font-family:ui-monospace,Consolas,monospace;font-size:12px;background:#eef1f6;border-radius:5px;padding:1px 5px;word-break:break-all}
+@media(max-width:800px){.grid{grid-template-columns:1fr 1fr}.cols{grid-template-columns:1fr}}
+@media(max-width:550px){.tab{max-width:none}.compose{flex-direction:column;align-items:stretch}.msgs{max-height:52vh}.shell{padding:12px}.grid,.checks{grid-template-columns:1fr}.row{flex-direction:column}.site{align-items:flex-start;flex-direction:column}.modal{align-items:flex-end;padding:0}.box{border-radius:16px 16px 0 0;max-height:92vh}.header .btn{padding:10px 12px}}
+</style>
+</head>
+<body>
+
+<div id="auth" class="auth">
+  <div class="brand"><div class="logo">🛡</div><div><b>ClearShield</b><div class="muted">Website safety, in plain language</div></div></div>
+  <h2>Sign in / create account</h2>
+  <p class="muted">Save your websites and check them whenever you want.</p>
+  <div class="field"><label for="email">Email</label><input id="email" type="email" autocomplete="email" placeholder="you@example.com"></div>
+  <div class="field"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" placeholder="6 or more characters"></div>
+  <div class="authbtns"><button class="btn" id="signup">Create account</button><button class="btn alt" id="login">Sign in</button><button class="btn alt" id="google">Google</button></div>
+  <p id="authmsg" class="msg" role="status" aria-live="polite"></p>
+</div>
+
+<div id="app" class="hidden"><div class="shell">
+  <header class="header">
+    <div class="brand"><div class="logo">🛡</div><div><b>ClearShield</b><div class="muted">Website safety dashboard</div></div></div>
+    <button id="logout" class="btn alt">Sign out</button>
+  </header>
+
+  <nav class="tabs" aria-label="Sections"><button class="tab on" id="tabDash" data-tab="dash">Dashboard</button><button class="tab" id="tabTobi" data-tab="tobi">🤖 Tobi AI</button></nav>
+
+<div id="viewDash">
+  <section class="card" style="background:linear-gradient(115deg,#eaf1ff,#fff);margin-top:16px">
+    <h2>Keep an eye on your websites.</h2>
+    <p class="muted">Save your websites, run a simple website safety check, and get clear steps to fix any potential problems. This is not a full security test.</p>
+  </section>
+
+  <div class="grid">
+    <div class="card tile"><div class="muted">Saved websites</div><div class="num" id="count">0</div></div>
+    <div class="card tile"><div class="muted">Last check</div><div class="num" id="last">—</div></div>
+    <div class="card tile"><div class="muted">Problems to look at</div><div class="num" id="attention">—</div></div>
+    <div class="card tile"><div class="muted">Signed in as</div><div class="num" style="font-size:17px;word-break:break-all" id="user"></div></div>
+  </div>
+
+  <div class="cols">
+    <div>
+      <section class="card">
+        <h3>Add a website</h3>
+        <div class="row">
+          <input id="domain" inputmode="url" autocapitalize="none" autocomplete="off" spellcheck="false" placeholder="example.com" aria-label="Website address">
+          <button id="add" class="btn">Save website</button>
+        </div>
+        <p id="addmsg" class="msg" role="status" aria-live="polite"></p>
+        <p class="muted">Only add websites you own or have permission to check. We do not confirm ownership.</p>
+      </section>
+
+      <section class="card">
+        <h3>Your websites</h3>
+        <div id="sites"><div class="muted">Loading…</div></div>
+      </section>
+
+      <section class="card">
+        <h3>What we check</h3>
+        <div class="checks">
+          <div class="check"><b>Website access</b><p>Can a browser reach your website?</p></div>
+          <div class="check"><b>Website protection settings</b><p>Extra safety rules your website gives to browsers, when we can see them.</p></div>
+          <div class="check"><b>Email protection</b><p>Whether your email is set up to stop fake messages sent in your name.</p></div>
+          <div class="check"><b>Website connection records</b><p>Public records that connect your website name to its server.</p></div>
+        </div>
+      </section>
+    </div>
+
+    <div>
+      <section class="card">
+        <h3>Selected website</h3>
+        <div id="selected" class="muted">Tap Check or Details on a saved website.</div>
+      </section>
+      <section class="card">
+        <h3>Check results</h3>
+        <div id="results" class="muted">Results will appear here.</div>
+      </section>
+      <section class="card">
+        <h3>Simple report</h3>
+        <div id="report" class="report">Run a check to create a report.</div>
+        <button id="copy" class="btn alt" disabled style="margin-top:10px">Copy report</button>
+      </section>
+    </div>
+  </div>
+
+</div><!-- end viewDash -->
+
+<div id="viewTobi" class="hidden">
+  <section class="card tobihead">
+    <div class="brand"><div class="logo tobilogo">🤖</div><div><h2 style="margin:0">Tobi AI</h2><div class="muted">Your website safety assistant. Plain English, step by step.</div></div></div>
+    <span id="tpill" class="tag t-grey">Not connected</span>
+  </section>
+
+  <div class="cols">
+    <div>
+      <section class="card">
+        <div class="field" style="margin-top:0"><label for="tsite">Website Tobi should talk about</label>
+          <select id="tsite"></select></div>
+        <div id="tctx" class="ctxbox muted"></div>
+      </section>
+
+      <section class="card">
+        <h3 style="margin-top:0">Chat with Tobi</h3>
+        <div id="tmsgs" class="msgs" aria-live="polite"></div>
+        <div class="chips" id="tchips">
+          <button class="small" data-q="Is my website safe?">Is my website safe?</button>
+          <button class="small" data-q="How do I fix this?">How do I fix this?</button>
+          <button class="small" data-q="Explain my check results in simple words.">Explain my results</button>
+          <button class="small" data-q="What does email sender verification mean?">What is email sender verification?</button>
+        </div>
+        <div class="compose">
+          <textarea id="tinput" rows="2" maxlength="1000" placeholder="Ask Tobi a question…" aria-label="Your question for Tobi"></textarea>
+          <button id="tsend" class="btn">Send</button>
+        </div>
+        <div class="row" style="margin-top:10px;justify-content:space-between;align-items:center">
+          <span class="muted">Tobi is an AI and can make mistakes. Back up and test before changing your website.</span>
+          <button id="tclear" class="small">Clear chat</button>
+        </div>
+      </section>
+    </div>
+
+    <div>
+      <section class="card">
+        <h3 style="margin-top:0">Tobi connection</h3>
+        <p class="muted">Tobi runs through a small private server that talks to DeepSeek for you. The DeepSeek key is stored only on that server (as <span class="code-inline">DEEPSEEK_API_KEY</span>). It is never put in this page.</p>
+        <div class="field"><label for="turl">Your Tobi server address</label><input id="turl" inputmode="url" autocapitalize="none" autocomplete="off" spellcheck="false" placeholder="https://your-tobi-server.example.com"></div>
+        <div class="actions" style="margin-top:0"><button id="tsave" class="btn">Save address</button><button id="ttest" class="btn alt">Test connection</button></div>
+        <p id="tcfgmsg" class="msg" role="status" aria-live="polite"></p>
+        <details><summary>What the server must provide</summary>
+          <p class="muted">• <span class="code-inline">POST /api/tobi/chat</span> — receives your question and the selected website's check results, signed in with your ClearShield login.<br>
+          • <span class="code-inline">GET /api/tobi/health</span> — says whether the server is ready.<br>
+          • The server must allow this page's address: <span class="code-inline" id="torigin"></span> in its <span class="code-inline">ALLOWED_ORIGINS</span> setting.<br>
+          The ready-to-use server is in the <span class="code-inline">tobi-backend</span> folder of the ZIP.</p>
+        </details>
+      </section>
+
+      <section class="card">
+        <h3 style="margin-top:0">What Tobi sees</h3>
+        <p class="muted">Tobi only receives your question, the website name and its check results. It never receives your password, email address or login details.</p>
+        <p class="muted">Tobi explains and guides. It does not change your website. ClearShield's checks are limited and cannot guarantee that a website is completely secure.</p>
+      </section>
+    </div>
+  </div>
+</div>
+
+  <div class="foot">Early version • Simple checks only • We never change your website • Only check websites you own or manage</div>
+</div></div>
+
+<div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="mtitle"><div class="box" id="mbox"></div></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import{getAuth,onAuthStateChanged,createUserWithEmailAndPassword,signInWithEmailAndPassword,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,signOut}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import{getDatabase,ref,set,get,update,remove}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const cfg={apiKey:"AIzaSyCOSXCcp0iyELPAABb68XS7k9H3EIxEqo8",authDomain:"tatya-data-analytics.firebaseapp.com",databaseURL:"https://tatya-data-analytics-default-rtdb.firebaseio.com",projectId:"tatya-data-analytics",storageBucket:"tatya-data-analytics.firebasestorage.app",messagingSenderId:"1093650217478",appId:"1:1093650217478:web:0134fbfb78c9519b7aa187",measurementId:"G-MCW8KVWX0G"};
+const app=initializeApp(cfg),auth=getAuth(app),db=getDatabase(app);
+
+let user=null,sites={},view=null,saving=false,checking=false,dlg=null;
+let tobiMsgs=[],tobiSite="",tobiBusy=false,tobiAbort=null,tobiState="";
+const confirmed=new Set();
+const $=x=>document.getElementById(x);
+
+/* ---------- small helpers ---------- */
+const key=d=>d.replace(/[.#$/\[\]]/g,"_");
+function esc(x){return String(x).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function fmt(iso){if(!iso)return"";const t=new Date(iso);return isNaN(t)?String(iso):t.toLocaleString([],{day:"numeric",month:"short",year:"numeric",hour:"numeric",minute:"2-digit"})}
+function sig(ms){if(window.AbortSignal&&AbortSignal.timeout)return AbortSignal.timeout(ms);const c=new AbortController();setTimeout(()=>c.abort(),ms);return c.signal}
+function withTimeout(p,ms){ms=ms||12000;let t;return Promise.race([p,new Promise((_,rej)=>{t=setTimeout(()=>{const e=new Error("timeout");e.code="timeout";rej(e)},ms)})]).finally(()=>clearTimeout(t))}
+
+let toastTimer;
+function say(text,type){const t=$("toast");t.textContent=text;t.className="toast"+(type?" "+type:"");t.style.display="block";clearTimeout(toastTimer);toastTimer=setTimeout(()=>{t.style.display="none"},5000)}
+function addMsg(text,type){const m=$("addmsg");m.textContent=text||"";m.className="msg"+(type?" "+type:"")}
+function authMsg(text,type){const m=$("authmsg");m.textContent=text||"";m.className="msg"+(type?" "+type:"")}
+
+function dbError(e,what){
+  const s=((e&&e.code)||"")+" "+((e&&e.message)||"");
+  if(/permission/i.test(s))return"Your database is blocking this. The person who set up ClearShield needs to allow each signed-in user to save to their own account.";
+  if(/offline|network/i.test(s))return"No internet connection. Please check your connection and try again.";
+  if(/timeout/i.test(s))return"This is taking too long. Please check your internet connection and try again.";
+  return"Could not "+what+". Please try again.";
+}
+function authText(e){
+  const c=(e&&e.code)||"";
+  const m={"auth/invalid-email":"That email address does not look right.","auth/missing-password":"Please type your password.","auth/weak-password":"Please choose a password with at least 6 characters.","auth/email-already-in-use":"An account with this email already exists. Try Sign in instead.","auth/invalid-credential":"The email or password is not correct.","auth/wrong-password":"The email or password is not correct.","auth/user-not-found":"The email or password is not correct.","auth/too-many-requests":"Too many tries. Please wait a few minutes and try again.","auth/network-request-failed":"No internet connection. Please try again.","auth/popup-closed-by-user":"The Google sign-in window was closed.","auth/unauthorized-domain":"Google sign-in is not allowed on this web address yet. The person who set up ClearShield needs to approve it in Firebase."};
+  return m[c]||"Sign-in did not work. Please try again.";
+}
+
+/* ---------- website address check ---------- */
+function normalizeDomain(raw){
+  let s=String(raw||"").trim().toLowerCase();
+  if(!s)return{error:"Please type your website address, for example example.com."};
+  if(/\s/.test(s))return{error:"A website address cannot contain spaces."};
+  if(!/^[a-z][a-z0-9+.-]*:\/\//.test(s))s="https://"+s;
+  let u;try{u=new URL(s)}catch(e){return{error:"That does not look like a website address. Try something like example.com."}}
+  if(!/^https?:$/.test(u.protocol))return{error:"Please use a normal website address (starting with http or https)."};
+  let h=u.hostname.replace(/\.$/,"").replace(/^www\./,"");
+  if(h==="localhost"||h.includes(":")||/^\d{1,3}(\.\d{1,3}){3}$/.test(h))return{error:"Please use a website name like example.com, not a number or a local address."};
+  const labels=h.split(".");
+  if(h.length>253||labels.length<2||!labels.every(l=>/^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/.test(l))||/^\d+$/.test(labels[labels.length-1]))return{error:"That does not look like a real website name. Try something like example.com."};
+  return{domain:h};
+}
+
+/* ---------- plain-English problem descriptions ---------- */
+function catalog(id,d){
+  const C={
+    "protection":{
+      title:"Website protection settings could not be confirmed",
+      what:"Your website can tell visitors' browsers to switch on extra safety rules. We could not see these rules on your website.",
+      why:"These rules help stop fake pages, hidden harmful code and unsafe connections. They protect your visitors and your good name.",
+      ignored:"Visitors get less protection from common tricks. It may be easier for someone to steal customer details or show harmful content on your website.",
+      fix:"Switch on three basic protection settings. A web developer or your web host can usually do this in a few minutes.",
+      steps:[
+        "Find out who looks after your website (your web host, developer or website builder).",
+        "Back up your current website settings first. Ask your web host how, or save a copy of the settings file.",
+        "Add the settings below, or send them to your developer. Pick the one that matches how your website is hosted.",
+        "If you use Wix, Shopify, Squarespace or a similar builder, these may already be on or controlled by them. Ask their support: \"Are website protection settings turned on?\"",
+        "Test your website. Open the home page, a contact form, and any login or payment pages. Make sure everything still works.",
+        "Come back here and tap Check again."
+      ],
+      snippets:[
+        {label:"If your website runs on Nginx",code:"# Website protection settings (Nginx)\nadd_header Strict-Transport-Security \"max-age=31536000\" always;\nadd_header X-Content-Type-Options \"nosniff\" always;\nadd_header Referrer-Policy \"strict-origin-when-cross-origin\" always;"},
+        {label:"If your website runs on Apache",code:"# Website protection settings (Apache)\nHeader always set Strict-Transport-Security \"max-age=31536000\"\nHeader always set X-Content-Type-Options \"nosniff\"\nHeader always set Referrer-Policy \"strict-origin-when-cross-origin\""}
+      ],
+      notes:[
+        "The first setting tells browsers to use only secure (https) connections to your website for one year. Make sure all your pages work with https before you add it.",
+        "There is a fourth, stronger protection setting. It can break websites if set wrongly, so ask a developer to add it.",
+        "Our check runs in your web browser and cannot always see these settings. If this notice stays after you fix it, ask your web host or developer to confirm the settings are on."
+      ]
+    },
+    "email-sender":{
+      title:"Email sender verification not found",
+      what:"This is a public note that lists who is allowed to send email using your website name. We could not find one.",
+      why:"It helps email services tell real emails from fake ones.",
+      ignored:"Scammers can more easily send fake emails that look like they come from you. Your real emails may also end up in spam folders.",
+      fix:"Add a sender verification note using the exact value from your email provider. Do not guess the value.",
+      steps:[
+        "Find out where your email comes from (for example Google Workspace, Microsoft 365, Zoho or your web host).",
+        "Search their help pages for \"SPF record\" and copy the exact value they give you.",
+        "Log in where your website name is managed (your domain provider). Take a screenshot of the existing records as a backup.",
+        "Check whether you already have a record that starts with v=spf1. You can only have ONE. If you do, edit it instead of adding a second one.",
+        "Add the record below, using your provider's value.",
+        "Wait a few hours, send yourself a test email, then tap Check again."
+      ],
+      snippets:[
+        {label:"Record to add (replace the capital letters)",code:"Record type: TXT\nName (or Host): @   (some providers want your website name, or want it left blank)\nValue: v=spf1 include:PASTE-VALUE-FROM-YOUR-EMAIL-PROVIDER ~all"}
+      ],
+      notes:[
+        "For example, Google Workspace uses include:_spf.google.com and Microsoft 365 uses include:spf.protection.outlook.com. Always confirm with your provider.",
+        "If you send email from other services too (newsletters, invoices, online shop), each one may need to be included. Ask each service."
+      ]
+    },
+    "email-fake":{
+      title:"Protection against fake emails not found",
+      what:"This is a public instruction that tells email services what to do with emails that pretend to come from your website name. We could not find one.",
+      why:"It helps stop scammers using your name, and it sends you reports about suspicious emails.",
+      ignored:"Fake emails in your name can reach your customers and nobody will tell you. This can hurt trust in your business.",
+      fix:"Add a starter record in \"monitor only\" mode. It does not block any email. It only sends you reports.",
+      steps:[
+        "If \"Email sender verification\" is also listed as a problem, fix that one first.",
+        "Choose an email inbox you check often to receive the reports.",
+        "Log in where your website name is managed (your domain provider). Take a screenshot of the existing records as a backup.",
+        "Add the record below. Replace the email address with your own inbox.",
+        "Wait a few hours, send yourself a test email, then tap Check again.",
+        "Later, ask an expert to make the setting stricter once the reports look healthy."
+      ],
+      snippets:[
+        {label:"Record to add (replace the email address)",code:"Record type: TXT\nName (or Host): _dmarc\nValue: v=DMARC1; p=none; rua=mailto:reports@"+d}
+      ],
+      notes:[
+        "reports@"+d+" is only an example. Use an inbox that really exists and that you read."
+      ]
+    }
+  };
+  return C[id];
+}
+
+/* ---------- loading and drawing saved websites ---------- */
+async function load(){
+  const uid=user.uid;
+  const s=await withTimeout(get(ref(db,"users/"+uid+"/sites")));
+  if(!user||user.uid!==uid)return;
+  sites=s.exists()?s.val():{};
+  draw();
+}
+function openCount(v){const st=v.findingStatus||{};return(v.lastFindingIds||[]).filter(id=>!st[id]).length}
+function draw(){
+  const entries=Object.entries(sites).sort((a,b)=>String(b[1].addedAt||"").localeCompare(String(a[1].addedAt||"")));
+  $("count").textContent=entries.length;
+  const last=entries.map(e=>e[1].lastChecked).filter(Boolean).sort().pop();
+  $("last").textContent=last?new Date(last).toLocaleDateString([],{day:"numeric",month:"short"}):"—";
+  $("sites").innerHTML=entries.length?entries.map(([k,v])=>{
+    const n=openCount(v);
+    const line=v.lastChecked?"Last check: "+esc(fmt(v.lastChecked))+(n?" · "+n+" problem"+(n>1?"s":"")+" to look at":" · Nothing found"):"Not checked yet";
+    const dis=checking?" disabled":"";
+    const e=encodeURIComponent(k);
+    return`<div class="site"><div><b>${esc(v.domain||k)}</b><div class="muted">${line}</div></div><div class="sbtns"><button class="small" data-act="check" data-k="${e}"${dis}>Check</button><button class="small" data-act="details" data-k="${e}">Details</button><button class="small" data-act="remove" data-k="${e}"${dis}>Remove</button></div></div>`;
+  }).join(""):`<div class="muted">No saved websites yet. Add your first one above.</div>`;
+  refreshTobiSites();
+}
+$("sites").addEventListener("click",ev=>{
+  const b=ev.target.closest("button[data-act]");if(!b||b.disabled)return;
+  const k=decodeURIComponent(b.dataset.k);
+  if(b.dataset.act==="check")review(k);
+  else if(b.dataset.act==="details")showDetails(k);
+  else if(b.dataset.act==="remove")del(k);
+});
+
+function selectSite(k){
+  const v=sites[k];if(!v)return;
+  $("selected").innerHTML=`<b>${esc(v.domain||k)}</b><p class="muted">${v.lastChecked?"Last checked "+esc(fmt(v.lastChecked))+".":"Not checked yet."} Tap Check on the website to run a new check.</p>`;
+}
+function showDetails(k){
+  const v=sites[k];if(!v)return;
+  selectSite(k);
+  view={k,checks:Array.isArray(v.lastChecks)&&v.lastChecks.length?v.lastChecks:null,saved:true,resolved:[],ids:v.lastFindingIds||[],at:v.lastChecked||null};
+  renderResults();
+}
+
+/* ---------- add website ---------- */
+function setSaving(b){saving=b;$("add").disabled=b;$("domain").disabled=b;$("add").textContent=b?"Saving…":"Save website"}
+async function addSite(){
+  if(saving)return;
+  if(!user){addMsg("Please sign in first.","err");return}
+  const r=normalizeDomain($("domain").value);
+  if(r.error){addMsg(r.error,"err");return}
+  const d=r.domain,k=key(d),uid=user.uid;
+  if(sites[k]||Object.values(sites).some(v=>String(v.domain||"").toLowerCase()===d)){addMsg(d+" is already in your list.","err");return}
+  setSaving(true);addMsg("Saving "+d+"…","");
+  try{
+    const path="users/"+uid+"/sites/"+k;
+    const snap=await withTimeout(get(ref(db,path)));
+    if(!user||user.uid!==uid)return;
+    if(snap.exists()){sites[k]=snap.val();draw();addMsg(d+" is already in your list.","err");return}
+    const rec={domain:d,addedAt:new Date().toISOString()};
+    await withTimeout(set(ref(db,path),rec));
+    if(!user||user.uid!==uid)return;
+    sites[k]=rec;draw();
+    $("domain").value="";
+    addMsg("Saved: "+d,"ok");say("Website saved","ok");
+  }catch(e){
+    addMsg(dbError(e,"save this website"),"err");
+  }finally{
+    setSaving(false);
+  }
+}
+
+async function del(k){
+  if(checking||!sites[k])return;
+  if(!confirm("Remove this website and its saved check results?"))return;
+  try{
+    await withTimeout(remove(ref(db,"users/"+user.uid+"/sites/"+k)));
+    delete sites[k];confirmed.delete(k);
+    if(view&&view.k===k){view=null;$("selected").textContent="Tap Check or Details on a saved website.";renderResults()}
+    draw();say("Website removed","ok");
+  }catch(e){say(dbError(e,"remove this website"),"err")}
+}
+
+/* ---------- checks ---------- */
+async function dns(n,t){const r=await fetch("https://dns.google/resolve?name="+encodeURIComponent(n)+"&type="+t,{signal:sig(5000)});if(!r.ok)throw Error("dns");return r.json()}
+
+async function review(k){
+  if(checking){say("A check is already running. Please wait.","err");return}
+  const v0=sites[k];if(!v0||!user)return;
+  const d=v0.domain||k,uid=user.uid;
+  if(!confirmed.has(k)){
+    if(!confirm("Please confirm that you own "+d+" or have permission to check it. This is a simple check. It does not harm or change your website."))return;
+    confirmed.add(k);
+  }
+  checking=true;draw();selectSite(k);
+  view=null;$("results").innerHTML=`<p class="muted"><span class="spin"></span>Checking ${esc(d)}… this takes a few seconds.</p>`;
+  $("report").textContent="Checking…";$("copy").disabled=true;$("attention").textContent="—";
+
+  const checks=[],found=[],okIds=new Set();
+  const addc=(name,status,desc)=>checks.push({name,status,desc});
+
+  try{
+    // 1. Website access and protection settings
+    try{
+      const r=await fetch("https://"+d,{mode:"cors",redirect:"follow",cache:"no-store",signal:sig(6500)});
+      const missing=["Content-Security-Policy","Strict-Transport-Security","X-Content-Type-Options","Referrer-Policy"].filter(h=>!r.headers.get(h));
+      addc("Website access","Working","Your website answered a browser request. This does not prove it is safe.");
+      if(missing.length){
+        addc("Website protection settings","Needs attention","We could not see some protection settings. Browsers can hide them, so this may be a false alarm.");
+        found.push("protection");
+      }else{
+        addc("Website protection settings","Found","Some protection settings were visible. We did not judge how good they are.");
+        okIds.add("protection");
+      }
+    }catch(e){
+      try{
+        await fetch("https://"+d,{mode:"no-cors",cache:"no-store",signal:sig(6500)});
+        addc("Website access","Working","Your website answered, but it does not let this page read its protection settings.");
+        addc("Website protection settings","Could not check","Browsers stop us from reading them. Ask your web host to confirm they are on.");
+      }catch(e2){
+        addc("Website access","Could not check","Your browser could not reach the website. This may be a browser or internet problem, not necessarily a problem with your website.");
+      }
+    }
+    // 2. Email sender verification
+    try{
+      const t=await dns(d,"TXT"),s=(t.Answer||[]).map(x=>x.data).join(" ").toLowerCase();
+      okIds.add("email-sender");
+      if(s.includes("v=spf1"))addc("Email sender verification","Found","A sender verification note was found. We did not check that it is correct.");
+      else{addc("Email sender verification","Needs attention","No sender verification note was found.");found.push("email-sender")}
+    }catch(e){addc("Email sender verification","Could not check","The lookup failed or was blocked.")}
+    // 3. Email protection against fake messages
+    try{
+      const t=await dns("_dmarc."+d,"TXT"),s=(t.Answer||[]).map(x=>x.data).join(" ").toLowerCase();
+      okIds.add("email-fake");
+      if(s.includes("v=dmarc1"))addc("Email protection against fake messages","Found","A fake-email protection note was found. We did not check how strong it is.");
+      else{addc("Email protection against fake messages","Needs attention","No fake-email protection note was found.");found.push("email-fake")}
+    }catch(e){addc("Email protection against fake messages","Could not check","The lookup failed or was blocked.")}
+    // 4. Website connection records
+    try{
+      const a=await dns(d,"A");
+      addc("Website connection records",a.Answer&&a.Answer.length?"Found":"Needs attention",a.Answer&&a.Answer.length?"Your website name points to a server.":"No answer came back. Your website name may not be set up properly.");
+    }catch(e){addc("Website connection records","Could not check","The lookup failed or was blocked.")}
+    addc("Security certificate (the padlock)","Not checked","This simple version cannot look at your website's security certificate.");
+  }finally{
+    checking=false;
+  }
+
+  const site=sites[k];
+  if(!site||!user||user.uid!==uid){draw();return}   // removed or signed out while checking
+
+  // Compare with what the user said before
+  const statuses=Object.assign({},site.findingStatus||{});
+  const resolved=[];
+  Object.keys(statuses).forEach(id=>{
+    if(!found.includes(id)&&okIds.has(id)){
+      if(statuses[id].state==="fixed")resolved.push(id);
+      delete statuses[id];
+    }
+  });
+  const at=new Date().toISOString();
+  view={k,checks,resolved,ids:found.slice(),at};
+  const rec={lastChecked:at,lastFindings:found.length,lastFindingIds:found.slice(),lastChecks:checks.map(x=>({name:x.name,status:x.status,desc:x.desc})),findingStatus:Object.keys(statuses).length?statuses:null};
+  sites[k]=Object.assign({},site,rec);
+  if(!rec.findingStatus)delete sites[k].findingStatus;
+  sites[k].lastReport=buildReport();
+  draw();selectSite(k);renderResults();
+  try{
+    await withTimeout(update(ref(db,"users/"+uid+"/sites/"+k),Object.assign({},rec,{lastReport:sites[k].lastReport})));
+    say(found.length?"Check finished. "+found.length+" potential problem"+(found.length>1?"s":"")+" found.":"Check finished. Nothing found.","ok");
+  }catch(e){say("Check finished, but the results could not be saved. "+dbError(e,"save the results"),"err")}
+}
+
+/* ---------- results, report, statuses ---------- */
+const tagClass={"Working":"t-ok","Found":"t-ok","Needs attention":"t-warn","Could not check":"t-grey","Not checked":"t-grey"};
+
+function stateLabel(s){return s.state==="fixed"?"Marked as fixed — not independently verified.":"Ignored — the problem has NOT been fixed."}
+
+function buildReport(){
+  if(!view||!view.at)return"";
+  const v=sites[view.k]||{},d=v.domain||view.k,st=v.findingStatus||{};
+  let t="Website: "+d+"\nChecked: "+fmt(view.at)+"\n\n";
+  if(!view.ids.length)t+="Nothing was found by these simple checks. This does not prove your website is safe.\n\n";
+  else view.ids.forEach((id,i)=>{
+    const f=catalog(id,d),s=st[id];
+    t+=(i+1)+". "+f.title+"\nStatus: "+(s?stateLabel(s):"Potential problem — not fixed yet")+"\nWhat it is: "+f.what+"\nWhy it matters: "+f.why+"\nIf ignored: "+f.ignored+"\nWhat you can do: "+f.fix+"\n\n";
+  });
+  view.resolved.forEach(id=>{const f=catalog(id,d);t+="Good news: \""+f.title+"\" was marked as fixed and was not found in the latest check. This is a simple check, not a guarantee.\n\n"});
+  t+="ABOUT THIS CHECK: This is a simple check of public information. It is not a full security test, a hacker test or a virus scan. No changes were made to your website.";
+  return t;
+}
+
+function findingCard(id,d,st,at){
+  const f=catalog(id,d),s=st[id];
+  let h=`<div class="finding"><div class="fhead"><b>${esc(f.title)}</b><span class="tag t-warn">Potential problem</span></div><p>${esc(f.what)}</p>`;
+  let btns;
+  if(s&&s.state==="fixed"){
+    h+=`<div class="state fixed">${esc(stateLabel(s))}</div>`;
+    if(at&&s.at&&at>s.at)h+=`<div class="state ignored">The latest check still finds this problem.</div>`;
+    else h+=`<p>Run another check to see if the problem is gone.</p>`;
+    btns=`<button class="small" data-fact="understand" data-id="${id}">Understand</button><button class="small primary" data-fact="recheck" data-id="${id}">Check again</button><button class="small" data-fact="undo" data-id="${id}">Undo</button><button class="small" data-fact="ask" data-id="${id}">Ask Tobi</button>`;
+  }else if(s&&s.state==="ignored"){
+    h+=`<div class="state ignored">${esc(stateLabel(s))}</div>`;
+    btns=`<button class="small" data-fact="understand" data-id="${id}">Understand</button><button class="small primary" data-fact="fix" data-id="${id}">Fix It</button><button class="small" data-fact="undo" data-id="${id}">Stop ignoring</button><button class="small" data-fact="ask" data-id="${id}">Ask Tobi</button>`;
+  }else{
+    btns=`<button class="small" data-fact="understand" data-id="${id}">Understand</button><button class="small primary" data-fact="fix" data-id="${id}">Fix It</button><button class="small" data-fact="ignore" data-id="${id}">Ignore</button><button class="small" data-fact="ask" data-id="${id}">Ask Tobi</button>`;
+  }
+  return h+`<div class="actions">${btns}</div></div>`;
+}
+
+function renderResults(){
+  if(!view){
+    $("results").innerHTML="Results will appear here.";
+    $("report").textContent="Run a check to create a report.";
+    $("copy").disabled=true;$("attention").textContent="—";return;
+  }
+  const v=sites[view.k]||{},d=v.domain||view.k,st=v.findingStatus||{};
+  let h="";
+  if(!view.at)h=`<p class="muted">This website has not been checked yet. Tap Check on the website to start.</p>`;
+  else{
+    if(view.checks)h+=`<div class="checks">${view.checks.map(x=>`<div class="check"><b>${esc(x.name)}</b> <span class="tag ${tagClass[x.status]||"t-grey"}">${esc(x.status)}</span><p>${esc(x.desc)}</p></div>`).join("")}</div>`;
+    if(view.saved)h+=`<p class="muted">Saved results from ${esc(fmt(view.at))}. Tap Check on the website for a new check.</p>`;
+    view.resolved.forEach(id=>{h+=`<div class="state good">✓ "${esc(catalog(id,d).title)}" is no longer found in the latest check. This is a simple check, not a guarantee.</div>`});
+    if(view.ids.length)h+=view.ids.map(id=>findingCard(id,d,st,view.checks?view.at:null)).join("");
+    else h+=`<p class="muted">Nothing specific was found. This does not mean your website is completely safe.</p>`;
+  }
+  $("results").innerHTML=h;
+  const rep=buildReport();
+  $("report").textContent=rep||"Run a check to create a report.";
+  $("copy").disabled=!rep;
+  $("attention").textContent=view.at?view.ids.filter(id=>!st[id]).length:"—";
+}
+
+async function setStatus(k,id,state){
+  const v=sites[k];if(!v||!user)return false;
+  const path="users/"+user.uid+"/sites/"+k+"/findingStatus/"+id;
+  try{
+    if(state){const s={state,at:new Date().toISOString()};await withTimeout(set(ref(db,path),s));v.findingStatus=Object.assign({},v.findingStatus,{[id]:s})}
+    else{await withTimeout(remove(ref(db,path)));if(v.findingStatus){delete v.findingStatus[id];if(!Object.keys(v.findingStatus).length)delete v.findingStatus}}
+    draw();renderResults();return true;
+  }catch(e){say(dbError(e,"save your choice"),"err");return false}
+}
+
+$("results").addEventListener("click",async ev=>{
+  const b=ev.target.closest("button[data-fact]");if(!b||!view)return;
+  const id=b.dataset.id,act=b.dataset.fact,k=view.k;
+  if(act==="understand")openDialog(id,"understand");
+  else if(act==="fix")openDialog(id,"fix");
+  else if(act==="recheck")review(k);
+  else if(act==="ask"){const f=catalog(id,(sites[k]||{}).domain||k);askTobi(k,"Please explain this problem in simple words and tell me how to fix it: "+f.title)}
+  else if(act==="ignore"){if(confirm("Ignore this problem? It will stay on your website until you fix it. ClearShield will mark it as not fixed."))await setStatus(k,id,"ignored")}
+  else if(act==="undo")await setStatus(k,id,null);
+});
+
+/* ---------- Understand / Fix It dialog ---------- */
+function dialogHTML(id,mode){
+  const v=sites[view.k]||{},d=v.domain||view.k,f=catalog(id,d),s=(v.findingStatus||{})[id];
+  const sec=(h,p)=>`<div class="dsec"><h4>${h}</h4><p>${esc(p)}</p></div>`;
+  let h=`<h3 id="mtitle">${esc(f.title)}</h3>`;
+  if(mode==="understand"){
+    h+=sec("What is the problem?",f.what)+sec("Why does it matter?",f.why)+sec("What could happen if I ignore it?",f.ignored)+sec("What can I do?",f.fix);
+    h+=`<div class="actions"><button class="btn" data-dact="fix">Show me how to fix it</button><button class="btn alt" data-dact="close">Close</button></div>`;
+    return h;
+  }
+  h+=sec("The problem",f.what)+sec("Why it matters",f.why)+sec("Recommended fix",f.fix);
+  h+=`<div class="dsec"><h4>Step by step</h4><ol class="steps">${f.steps.map(x=>`<li>${esc(x)}</li>`).join("")}</ol></div>`;
+  f.snippets.forEach((x,i)=>{h+=`<div class="dsec"><h4>${esc(x.label)}</h4><pre class="code">${esc(x.code)}</pre><button class="small" data-dact="copy" data-i="${i}">Copy</button></div>`});
+  f.notes.forEach(n=>{h+=`<p class="muted">${esc(n)}</p>`});
+  h+=`<div class="warn"><b>Before you change anything</b><br>Back up your current settings and test the change. Wrong settings can break your website or stop your email. ClearShield has not changed anything on your website and cannot do it for you.</div>`;
+  if(s&&s.state==="fixed")h+=`<div class="state fixed">${esc(stateLabel(s))}</div>`;
+  h+=`<div class="actions">${s&&s.state==="fixed"?"":`<button class="btn" data-dact="mark">Mark as fixed</button>`}<button class="btn alt" data-dact="recheck">Check again</button><button class="btn alt" data-dact="close">Close</button></div>`;
+  h+=`<p class="muted">"Mark as fixed" only saves your note. It does not prove the problem is gone. Use "Check again" to see if it is still found.</p>`;
+  return h;
+}
+function openDialog(id,mode){
+  if(!view)return;
+  dlg={id,k:view.k};
+  $("mbox").innerHTML=dialogHTML(id,mode);
+  $("modal").style.display="flex";$("mbox").scrollTop=0;
+}
+function closeDialog(){$("modal").style.display="none";dlg=null}
+async function copyText(text){
+  try{await navigator.clipboard.writeText(text);return true}catch(e){
+    try{const t=document.createElement("textarea");t.value=text;t.style.position="fixed";t.style.opacity="0";document.body.appendChild(t);t.select();const ok=document.execCommand("copy");t.remove();return ok}catch(e2){return false}
+  }
+}
+$("modal").addEventListener("click",async ev=>{
+  if(ev.target===$("modal")){closeDialog();return}
+  const b=ev.target.closest("button[data-dact]");if(!b||!dlg)return;
+  const act=b.dataset.dact,{id,k}=dlg;
+  if(act==="close")closeDialog();
+  else if(act==="fix")openDialog(id,"fix");
+  else if(act==="copy"){const d=(sites[k]||{}).domain||k;const x=catalog(id,d).snippets[+b.dataset.i];say(x&&await copyText(x.code)?"Copied. Paste it where your developer or host asks.":"Copy did not work. Please select the text and copy it.",x?"ok":"err")}
+  else if(act==="mark"){b.disabled=true;if(await setStatus(k,id,"fixed")){closeDialog();say("Marked as fixed — not independently verified. Run a check to see if it is gone.","ok")}else b.disabled=false}
+  else if(act==="recheck"){closeDialog();review(k)}
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&dlg)closeDialog()});
+
+
+/* ---------- Tobi AI ---------- */
+// Optional default address of your Tobi server. Not a secret. The DeepSeek key is NEVER stored here.
+const TOBI_BACKEND_URL="";
+const TOBI_CHAT="/api/tobi/chat",TOBI_HEALTH="/api/tobi/health";
+function cleanUrl(x){
+  let s=String(x||"").trim().replace(/\/api\/tobi\/(chat|health)\/?$/,"").replace(/\/+$/,"");
+  if(!s)return null;
+  try{const u=new URL(s);const local=u.hostname==="localhost"||u.hostname==="127.0.0.1";
+    if(u.protocol!=="https:"&&!(u.protocol==="http:"&&local))return null;
+    return u.origin+u.pathname.replace(/\/+$/,"")}catch(e){return null}
+}
+function getSavedUrl(){try{return localStorage.getItem("clearshield_tobi_url")||""}catch(e){return""}}
+function putSavedUrl(v){try{if(v)localStorage.setItem("clearshield_tobi_url",v);else localStorage.removeItem("clearshield_tobi_url");return true}catch(e){return false}}
+let tobiUrl=cleanUrl(getSavedUrl())||cleanUrl(TOBI_BACKEND_URL)||"";
+
+const NOT_CONNECTED="Tobi is not connected yet, so I cannot answer. ClearShield needs a small private server that talks to DeepSeek for you. Enter your server address under \"Tobi connection\". The server must provide POST /api/tobi/chat, and the DeepSeek key must be set on that server as DEEPSEEK_API_KEY.";
+
+function tobiReset(){
+  if(tobiAbort){try{tobiAbort.abort()}catch(e){}}
+  tobiAbort=null;tobiBusy=false;tobiMsgs=[];tobiSite="";
+  if($("tinput"))$("tinput").value="";
+  refreshTobiSites();renderTobi();
+}
+function showTab(t){
+  $("viewDash").classList.toggle("hidden",t!=="dash");
+  $("viewTobi").classList.toggle("hidden",t!=="tobi");
+  $("tabDash").classList.toggle("on",t==="dash");$("tabTobi").classList.toggle("on",t==="tobi");
+  if(t==="tobi"){
+    if(!tobiSite&&view&&sites[view.k])tobiSite=view.k;
+    refreshTobiSites();renderTobi();$("torigin").textContent=location.origin;$("turl").value=tobiUrl;updatePill();
+  }
+}
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+
+function refreshTobiSites(){
+  const sel=$("tsite");if(!sel)return;
+  if(tobiSite&&!sites[tobiSite])tobiSite="";
+  const opts=[`<option value="">No website (general questions)</option>`].concat(Object.entries(sites).map(([k,v])=>`<option value="${esc(k)}"${k===tobiSite?" selected":""}>${esc(v.domain||k)}</option>`));
+  sel.innerHTML=opts.join("");sel.value=tobiSite;
+  updateCtx();
+}
+function updateCtx(){
+  const box=$("tctx");if(!box)return;
+  const v=tobiSite&&sites[tobiSite];
+  if(!v){box.textContent="Tobi will answer general website safety questions. Pick a saved website to let Tobi use its check results.";return}
+  if(!v.lastChecked){box.textContent=(v.domain||tobiSite)+" has not been checked yet. Run a check on the Dashboard so Tobi can see the results.";return}
+  const n=openCount(v);
+  box.textContent="Tobi can see: "+(v.domain||tobiSite)+" · checked "+fmt(v.lastChecked)+" · "+(n?n+" potential problem"+(n>1?"s":"")+" to look at":"nothing found")+".";
+}
+function updatePill(){
+  const p=$("tpill");if(!p)return;
+  if(!tobiUrl){p.textContent="Not connected";p.className="tag t-grey"}
+  else if(tobiState==="ready"){p.textContent="Connected";p.className="tag t-ok"}
+  else if(tobiState==="notready"||tobiState==="unreachable"){p.textContent=tobiState==="notready"?"Server not ready":"Cannot reach server";p.className="tag t-bad"}
+  else{p.textContent="Address saved";p.className="tag t-warn"}
+}
+function setTobiSite(k){
+  if(k===tobiSite)return;
+  tobiSite=k;
+  const v=k&&sites[k];
+  tobiMsgs.push({role:"note",content:v?"Now talking about "+(v.domain||k):"Now answering general questions"});
+  refreshTobiSites();
+}
+$("tsite").onchange=()=>{setTobiSite($("tsite").value);renderTobi()};
+
+function tobiContext(){
+  const k=tobiSite,v=k&&sites[k];if(!v)return null;
+  const d=v.domain||k,st=v.findingStatus||{};
+  return{
+    domain:d,
+    checkedAt:v.lastChecked||null,
+    hasBeenChecked:!!v.lastChecked,
+    checks:(v.lastChecks||[]).map(c=>({name:c.name,status:c.status,description:c.desc})),
+    findings:(v.lastFindingIds||[]).map(id=>{
+      const f=catalog(id,d);if(!f)return null;const s=st[id];
+      return{title:f.title,whatItIs:f.what,whyItMatters:f.why,ifIgnored:f.ignored,recommendedFix:f.fix,steps:f.steps,
+        suggestedSettings:f.snippets.map(x=>({label:x.label,text:x.code})),
+        status:s?(s.state==="fixed"?"Marked as fixed by the owner - not independently verified":"Ignored by the owner - the problem is NOT fixed"):"Potential problem - not fixed yet"};
+    }).filter(Boolean)
+  };
+}
+
+function fmtBot(t){
+  return String(t).split("```").map((p,i)=>{
+    if(i%2===1){const code=p.replace(/^[a-zA-Z0-9_+-]*\n/,"").replace(/\n+$/,"");return`<div class="cb"><pre class="code">${esc(code)}</pre><button class="small" data-tcopy="1">Copy</button></div>`}
+    return esc(p.replace(/^\n+|\n+$/g,"")).replace(/\*\*([^*\n]+)\*\*/g,"<b>$1</b>").replace(/`([^`\n]+)`/g,"<code>$1</code>");
+  }).join("");
+}
+function bubble(m){
+  if(m.role==="note")return`<div class="note">${esc(m.content)}</div>`;
+  if(m.role==="user")return`<div class="m user"><div class="b user">${esc(m.content)}</div></div>`;
+  if(m.role==="error")return`<div class="m"><div class="who">Tobi</div><div class="b err">${esc(m.content)}</div></div>`;
+  return`<div class="m"><div class="who">Tobi</div><div class="b bot">${fmtBot(m.content)}</div></div>`;
+}
+function renderTobi(){
+  const box=$("tmsgs");if(!box)return;
+  let h=tobiMsgs.length?tobiMsgs.map(bubble).join(""):`<div class="m"><div class="who">Tobi</div><div class="b bot">Hi, I'm Tobi, ClearShield's safety assistant. I explain website safety problems in simple words and guide you through safe fixes.\n\nPick a saved website above, then ask me a question. I only use the results of your ClearShield checks.</div></div>`;
+  if(tobiBusy)h+=`<div class="note"><span class="spin"></span>Tobi is thinking…</div>`;
+  box.innerHTML=h;box.scrollTop=box.scrollHeight;
+  $("tsend").disabled=tobiBusy;$("tsend").textContent=tobiBusy?"Sending…":"Send";$("tinput").disabled=tobiBusy;
+  document.querySelectorAll("#tchips button").forEach(b=>b.disabled=tobiBusy);
+}
+function tobiErr(status,data,retry){
+  const srv=data&&typeof data.error==="string"?data.error:"";
+  if(status===400)return srv||"Tobi could not read that question. Please try again.";
+  if(status===401)return"Tobi's server could not confirm your sign-in. Please sign out, sign in again and try again.";
+  if(status===413)return"That message was too big. Please ask a shorter question.";
+  if(status===429){const n=parseInt(retry,10);return"Tobi is getting a lot of questions right now. Please wait "+(n>0?n+" seconds":"a minute")+" and try again."}
+  if(status===503)return srv||"Tobi's server is not fully set up yet (the DeepSeek key may be missing on the server).";
+  if(status===502||status===504)return srv||"Tobi's AI service did not answer. Please try again in a minute.";
+  return srv||"Something went wrong (error "+status+"). Please try again.";
+}
+async function sendTobi(raw){
+  if(tobiBusy||!user)return;
+  const text=String(raw||"").trim();
+  if(!text){say("Please type a question first.","err");return}
+  if(text.length>1000){say("Please keep your question under 1000 characters.","err");return}
+  if(!tobiUrl){
+    tobiMsgs.push({role:"user",content:text},{role:"error",content:NOT_CONNECTED});
+    $("tinput").value="";renderTobi();$("turl").focus();return;
+  }
+  const ctx=tobiContext();
+  tobiMsgs.push({role:"user",content:text});$("tinput").value="";
+  tobiBusy=true;renderTobi();
+  const history=tobiMsgs.filter(m=>m.role==="user"||m.role==="assistant").slice(-12).map(m=>({role:m.role,content:m.content}));
+  const ac=new AbortController();tobiAbort=ac;
+  const timer=setTimeout(()=>ac.abort(),50000);
+  try{
+    const token=await user.getIdToken();
+    const r=await fetch(tobiUrl+TOBI_CHAT,{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({messages:history,context:ctx}),signal:ac.signal});
+    let data=null;try{data=await r.json()}catch(e){}
+    if(tobiAbort!==ac)return;
+    if(r.ok&&data&&typeof data.reply==="string"&&data.reply.trim())tobiMsgs.push({role:"assistant",content:data.reply});
+    else tobiMsgs.push({role:"error",content:r.ok?"Tobi sent an empty answer. Please try again.":tobiErr(r.status,data,r.headers.get("Retry-After"))});
+  }catch(e){
+    if(tobiAbort!==ac)return;
+    tobiMsgs.push({role:"error",content:e&&e.name==="AbortError"?"Tobi took too long to answer. Please try again.":"Could not reach Tobi's server. Check your internet, the server address under \"Tobi connection\", and that the server allows "+location.origin+"."});
+  }finally{
+    clearTimeout(timer);
+    if(tobiAbort===ac){tobiAbort=null;tobiBusy=false;renderTobi()}
+  }
+}
+function askTobi(k,q){showTab("tobi");setTobiSite(k);renderTobi();sendTobi(q)}
+
+$("tsend").onclick=()=>sendTobi($("tinput").value);
+$("tinput").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendTobi($("tinput").value)}});
+$("tchips").addEventListener("click",e=>{const b=e.target.closest("button[data-q]");if(b&&!b.disabled)sendTobi(b.dataset.q)});
+$("tclear").onclick=()=>{if(tobiAbort){try{tobiAbort.abort()}catch(e){}}tobiAbort=null;tobiBusy=false;tobiMsgs=[];renderTobi()};
+$("tmsgs").addEventListener("click",async e=>{
+  const b=e.target.closest("button[data-tcopy]");if(!b)return;
+  const pre=b.previousElementSibling;
+  say(pre&&await copyText(pre.textContent)?"Copied":"Copy did not work.",pre?"ok":"err");
+});
+
+function cfgMsg(t,type){const m=$("tcfgmsg");m.textContent=t||"";m.className="msg"+(type?" "+type:"")}
+$("tsave").onclick=()=>{
+  const raw=$("turl").value.trim();
+  if(!raw){tobiUrl="";putSavedUrl("");tobiState="";updatePill();cfgMsg("Server address removed.","ok");return}
+  const u=cleanUrl(raw);
+  if(!u){cfgMsg("Please enter a full address starting with https:// (for example https://tobi.yourcompany.com).","err");return}
+  tobiUrl=u;tobiState="";$("turl").value=u;
+  cfgMsg(putSavedUrl(u)?"Saved. Tap Test connection to check it.":"Address is set for this visit only (your browser would not save it).","ok");
+  updatePill();
+};
+$("ttest").onclick=async()=>{
+  const u=cleanUrl($("turl").value)||tobiUrl;
+  if(!u){cfgMsg("Enter your Tobi server address first.","err");return}
+  $("ttest").disabled=true;cfgMsg("Testing…","");
+  try{
+    const r=await fetch(u+TOBI_HEALTH,{cache:"no-store",signal:sig(8000)});
+    const d=await r.json().catch(()=>null);
+    if(r.ok&&d&&d.ok&&d.configured){tobiState="ready";cfgMsg("Connected. The server is ready and its DeepSeek key is set.","ok")}
+    else if(r.ok&&d&&d.ok){tobiState="notready";cfgMsg("The server answered, but its DeepSeek key (DEEPSEEK_API_KEY) is not set yet. Tobi cannot answer until it is.","err")}
+    else{tobiState="notready";cfgMsg("That address answered but does not look like a Tobi server (error "+r.status+").","err")}
+  }catch(e){tobiState="unreachable";cfgMsg("Could not reach that address. Check that the server is running and that its ALLOWED_ORIGINS setting includes "+location.origin+".","err")}
+  finally{$("ttest").disabled=false;updatePill()}
+};
+
+/* ---------- buttons ---------- */
+$("add").onclick=addSite;
+$("domain").addEventListener("keydown",e=>{if(e.key==="Enter")addSite()});
+$("domain").addEventListener("input",()=>addMsg(""));
+$("copy").onclick=async()=>{const t=buildReport();say(t&&await copyText(t)?"Report copied":"Copy did not work.",t?"ok":"err")};
+
+function authBusy(b){["signup","login","google"].forEach(i=>$(i).disabled=b)}
+$("signup").onclick=async()=>{
+  const e=$("email").value.trim(),p=$("password").value;
+  if(!e)return authMsg("Please type your email.","err");
+  if(p.length<6)return authMsg("Please choose a password with at least 6 characters.","err");
+  authBusy(true);authMsg("Creating your account…","");
+  try{await createUserWithEmailAndPassword(auth,e,p);authMsg("")}catch(x){authMsg(authText(x),"err")}finally{authBusy(false)}
+};
+$("login").onclick=async()=>{
+  const e=$("email").value.trim(),p=$("password").value;
+  if(!e||!p)return authMsg("Please type your email and password.","err");
+  authBusy(true);authMsg("Signing in…","");
+  try{await signInWithEmailAndPassword(auth,e,p);authMsg("")}catch(x){authMsg(authText(x),"err")}finally{authBusy(false)}
+};
+$("google").onclick=async()=>{
+  authBusy(true);authMsg("Opening Google…","");
+  const p=new GoogleAuthProvider();
+  try{await signInWithPopup(auth,p);authMsg("")}
+  catch(x){
+    if(x&&(x.code==="auth/popup-blocked"||x.code==="auth/operation-not-supported-in-this-environment")){try{await signInWithRedirect(auth,p);return}catch(y){authMsg(authText(y),"err")}}
+    else if(!x||x.code!=="auth/cancelled-popup-request")authMsg(authText(x),"err");
+    else authMsg("");
+  }finally{authBusy(false)}
+};
+$("logout").onclick=()=>signOut(auth).catch(()=>say("Could not sign out. Please try again.","err"));
+getRedirectResult(auth).catch(x=>authMsg(authText(x),"err"));
+
+onAuthStateChanged(auth,async u=>{
+  user=u;view=null;dlg=null;closeDialog();tobiReset();showTab("dash");
+  if(u){
+    $("auth").classList.add("hidden");$("app").classList.remove("hidden");
+    $("user").textContent=u.email||"Account";
+    $("sites").innerHTML=`<div class="muted"><span class="spin"></span>Loading…</div>`;
+    renderResults();
+    try{await load()}catch(e){$("sites").innerHTML=`<div class="muted">Could not load your websites. ${esc(dbError(e,"load your websites"))}</div>`}
+  }else{
+    sites={};confirmed.clear();checking=false;
+    $("app").classList.add("hidden");$("auth").classList.remove("hidden");
+    $("password").value="";addMsg("");renderResults();
+  }
+});
+</script>
+</body>
+</html>
